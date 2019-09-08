@@ -9,13 +9,14 @@
       <h2>{{`Parent age data: ${age}`}}</h2>
       <select name="showComponent" id="showComponent" v-model="showComponent">
         <option value="Filter">Filter</option>
-        <option value="Prop">Props</option>
+        <option value="Emit">Emit</option>
       </select>
     </div>
     <img alt="Vue logo" src="./assets/logo.png" />
     <component :is="CurrentComponent" v-bind="allProps"/>
-    <!-- 无法通过传递所有props传递.sync的数据, 参考 https://github.com/vuejs/vue/issues/4962#issuecomment-466930107 -->
+    <!-- 无法通过传递所有props传递.sync v-on的数据, 参考 https://github.com/vuejs/vue/issues/4962#issuecomment-466930107 -->
     <PropComponent :name="name" :age.sync="age" />
+    <EmitComponent v-on:childComponentClick="childButtonCLick" />
   </div>
 </template>
 
@@ -24,12 +25,14 @@ import { Component, Vue, Watch } from 'vue-property-decorator';
 import FilterComponent from './components/filter.vue';
 import DirectiveComponent from './components/directive.vue';
 import PropComponent from './components/props.vue';
+import EmitComponent from './components/emit.vue';
 
 @Component({
   components: {
     FilterComponent,
     DirectiveComponent,
     PropComponent,
+    EmitComponent,
   },
 })
 export default class App extends Vue {
@@ -54,12 +57,13 @@ export default class App extends Vue {
       case 'Filter':
         this.CurrentComponent = FilterComponent;
         break;
-      case 'Prop':
-        this.CurrentComponent = PropComponent;
-        break;
       default:
         break;
     }
+  }
+
+  private childButtonCLick(data:string, event:MouseEvent) {
+    this.name = data;
   }
 }
 </script>
