@@ -1,19 +1,26 @@
 <template>
   <div id="app">
-    <h1>I'm parent</h1>
-    <h2>Parent name data: <input type="text" v-model="name"></h2>
-    <h2>{{`Parent age data: ${age}`}}</h2>
-    <img alt="Vue logo" src="./assets/logo.png">
-    <FilterComponent/>
-    <hr>
-    <DirectiveComponent/>
-    <hr>
+    <div id="parent">
+      <h1>I'm parent</h1>
+      <h2>
+        Parent name data:
+        <input type="text" v-model="name" />
+      </h2>
+      <h2>{{`Parent age data: ${age}`}}</h2>
+      <select name="showComponent" id="showComponent" v-model="showComponent">
+        <option value="Filter">Filter</option>
+        <option value="Prop">Props</option>
+      </select>
+    </div>
+    <img alt="Vue logo" src="./assets/logo.png" />
+    <component :is="CurrentComponent" v-bind="allProps"/>
+    <!-- 无法通过传递所有props传递.sync的数据, 参考 https://github.com/vuejs/vue/issues/4962#issuecomment-466930107 -->
     <PropComponent :name="name" :age.sync="age" />
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue, Watch } from 'vue-property-decorator';
 import FilterComponent from './components/filter.vue';
 import DirectiveComponent from './components/directive.vue';
 import PropComponent from './components/props.vue';
@@ -26,19 +33,48 @@ import PropComponent from './components/props.vue';
   },
 })
 export default class App extends Vue {
-  private age = 18
+  private age = 18;
 
-  private name = 'lorry'
+  private CurrentComponent = FilterComponent;
+
+  private name = 'lorry';
+
+  private showComponent = 'Filter'
+
+  private allProps = {
+    name: 'lorry',
+    showComponent: 'Filter',
+    age: 18,
+  }
+
+  @Watch('showComponent')
+  private ComponentChange(newValue: String) {
+    console.log(newValue);
+    switch (newValue) {
+      case 'Filter':
+        this.CurrentComponent = FilterComponent;
+        break;
+      case 'Prop':
+        this.CurrentComponent = PropComponent;
+        break;
+      default:
+        break;
+    }
+  }
 }
 </script>
 
 <style>
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+#parent {
+  border: grey dotted 1px;
+  padding: 10px;
 }
 </style>
